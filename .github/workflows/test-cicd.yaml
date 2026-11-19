@@ -2,8 +2,8 @@
 name: GCP Authentication Test
 #Trgigger que va a lanzar el workflow
 on: 
-  push:
-    branches: [ main, master ] #Cuando haya un push en esta ramas se ejecuta
+  # push:
+  #   branches: [ main, master ] #Cuando haya un push en esta ramas se ejecuta
   workflow_dispatch:    # permite ejecutar el workflow manualmente     
 ### Allow the job to fetch a GitHub ID token by adding the following configuration:
 permissions:
@@ -21,7 +21,8 @@ jobs:
     steps:  #Nombre del step
     
       - id: set-env  #Nombre del step 
-        run: |  # Script que se va a ejecutar detecta la rama que se va a ejecutar    
+      # Script que se va a ejecutar detecta la rama que se va a ejecutar
+        run: |      
           case "${{ github.ref_name # }}" in    
           main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
           uat)    echo "env_name=uat" >> $GITHUB_OUTPUT ;;
