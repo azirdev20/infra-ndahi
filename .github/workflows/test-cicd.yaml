@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
       # Variables que se van a usar
     outputs:
-      env_name: ${{ steps.set-env.outputs.env_name }}
+      env_name: ${{ steps.set-env.outputs.env_name }} #exporta la variable de steps, con el id set-env y toma la variable env_name 
     steps:  #Nombre del step
     
       - id: set-env
@@ -29,12 +29,12 @@ jobs:
           dev)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
           esac 
   test-gcp-connection:      #Nombre del segundo job     
-    needs: prepare      #depende que se ejecute el job anterior
+    needs: prepare      #depende que se ejecute el job anterior llamado prepare
     runs-on: ubuntu-latest
-    environment: ${{ needs.prepare.outputs.env_name}}         
-    concurrency: ${{ needs.prepare.outputs.env_name}}
+    environment: ${{ needs.prepare.outputs.env_name}} # Usa las variables del environment que viene de la rama que se identifica en el job anterior 
+    concurrency: ${{ needs.prepare.outputs.env_name}} # Solo se ejecuta un job por rama
     steps:
-      - name: Checkout Code
+      - name: Checkout Code # Descarga el codigo de la rama que se va a ejecutar
         uses: actions/checkout@v4
 
       # 1. Autenticación moderna: Genera las credenciales en el backend automáticamente
