@@ -35,4 +35,5 @@ jobs:
       - name: Verify Connection
         run: |
           gcloud auth list
+          gcloud compute networks list 
 
