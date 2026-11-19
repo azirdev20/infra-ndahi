@@ -12,7 +12,9 @@ permissions:
 jobs:
   test-gcp-connection:
     runs-on: ubuntu-latest
-
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || 'dev'}}
+    concurrency: $ {{ github.ref_name == 'main' && 'prod' || 'dev'}}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -21,9 +23,9 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          project_id: 'networking-services-ndahi '
-          workload_identity_provider: 'projects/879534488129/locations/global/workloadIdentityPools/wif-pool-ndahi-dev/providers/wif-provider-github'
-          service_account: 'sa-wif-github@networking-services-ndahi.iam.gserviceaccount.com'
+          project_id: ${{ vars.PROJECT_ID}}
+          workload_identity_provider: ${{ vars.WIF_PROVIDER}}
+          service_account: $ {{ vars.SA_WIF}}
 
       # 2. Configuración oficial del SDK de gcloud para heredar la sesión de arriba
       - name: Set up Cloud SDK
