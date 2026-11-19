@@ -22,7 +22,7 @@ jobs:
     
       - id: set-env
         run: |      
-          case "${{ github.ref_name # }}" in    
+          case "${{ github.ref_name }}" in    
           main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
           uat)    echo "env_name=uat" >> $GITHUB_OUTPUT ;;
           qa)    echo "env_name=qa" >> $GITHUB_OUTPUT ;;
