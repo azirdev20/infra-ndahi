@@ -1,32 +1,37 @@
+##Nombre completo del workflow
 name: GCP Authentication Test
-
-on:
+#Trgigger que va a lanzar el workflow
+on: 
   push:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ main, master ] #Cuando haya un push en esta ramas se ejecuta
+  workflow_dispatch:    # permite ejecutar el workflow manualmente     
 ### Allow the job to fetch a GitHub ID token by adding the following configuration:
 permissions:
   contents: read
   id-token: write
-
+#Jobs que se van a ejecutar
 jobs:
+#Nombre del job
   prepare:
+  # Maquina que se va a usar o distro
     runs-on: ubuntu-latest
+      # Variables que se van a usar
     outputs:
       env_name: ${{ steps.set-env.outputs.env_name }}
-    steps:
-      - id: set-env
-        run: |
-          case "${{ github.ref_name}}" in
+    steps:  #Nombre del step
+    
+      - id: set-env  #Nombre del step 
+        run: |  # Script que se va a ejecutar detecta la rama que se va a ejecutar    
+          case "${{ github.ref_name # }}" in    
           main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
           uat)    echo "env_name=uat" >> $GITHUB_OUTPUT ;;
           qa)    echo "env_name=qa" >> $GITHUB_OUTPUT ;;
           dev)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
-          esac
-  test-gcp-connection:
-    needs: prepare
+          esac 
+  test-gcp-connection:      #Nombre del segundo job     
+    needs: prepare      #depende que se ejecute el job anterior
     runs-on: ubuntu-latest
-    environment: ${{ needs.prepare.outputs.env_name}}
+    environment: ${{ needs.prepare.outputs.env_name}}         
     concurrency: ${{ needs.prepare.outputs.env_name}}
     steps:
       - name: Checkout Code
@@ -34,7 +39,7 @@ jobs:
 
       # 1. Autenticación moderna: Genera las credenciales en el backend automáticamente
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v2 
         with:
           project_id: ${{ vars.PROJECT_ID }}
           workload_identity_provider: ${{ vars.WIF_PROVIDER }}
@@ -42,11 +47,11 @@ jobs:
 
       # 2. Configuración oficial del SDK de gcloud para heredar la sesión de arriba
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v2     
 
       # 3. Verificación limpia sin necesidad de "gcloud auth login" manual
       - name: Verify Connection
-        run: |
+        run: |         #Imprime las redes que tiene acceso y la cuenta que tiene acceso
           gcloud auth list
           gcloud compute networks list 
 
