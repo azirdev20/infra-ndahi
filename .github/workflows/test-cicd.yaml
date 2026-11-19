@@ -10,11 +10,24 @@ permissions:
   id-token: write
 
 jobs:
-  test-gcp-connection:
+  prepare:
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.ref_name == 'main' && 'prod' || 'dev'}}
-    concurrency: $ {{ github.ref_name == 'main' && 'prod' || 'dev'}}
+    outputs:
+      env_name: ${{ steps.set-env.outputs.env_name }}
+    steps:
+      - id: set-env
+        run: |
+          case "${{ github.ref_name}}" in
+          main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
+          uat)    echo "env_name=uat" >> $GITHUB_OUTPUT ;;
+          qa)    echo "env_name=qa" >> $GITHUB_OUTPUT ;;
+          dev)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
+          esac
+  test-gcp-connection:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: ${{ needs.prepare.outputs.env_name}}
+    concurrency: ${{ needs.prepare.outputs.env_name}}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
