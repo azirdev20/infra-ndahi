@@ -20,8 +20,7 @@ jobs:
       env_name: ${{ steps.set-env.outputs.env_name }}
     steps:  #Nombre del step
     
-      - id: set-env  #Nombre del step 
-      # Script que se va a ejecutar detecta la rama que se va a ejecutar
+      - id: set-env
         run: |      
           case "${{ github.ref_name # }}" in    
           main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
