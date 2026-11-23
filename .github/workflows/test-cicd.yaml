@@ -11,28 +11,28 @@ permissions:
   id-token: write
 #Jobs que se van a ejecutar
 jobs:
-#Nombre del job
+  # Nombre del job
   prepare:
-  # Maquina que se va a usar o distro
+    # Maquina que se va a usar o distro
     runs-on: ubuntu-latest
-      # Variables que se van a usar
+    # Variables que se van a exportar
     outputs:
-      env_name: ${{ steps.set-env.outputs.env_name }} #exporta la variable de steps, con el id set-env y toma la variable env_name 
-    steps:  #Nombre del step
-    
+      env_name: ${{ steps.set-env.outputs.env_name }} # exporta la variable de steps, con el id set-env y toma la variable env_name 
+    steps:
       - id: set-env
         run: |      
           case "${{ github.ref_name }}" in    
-          main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
-          uat)    echo "env_name=uat" >> $GITHUB_OUTPUT ;;
-          qa)    echo "env_name=qa" >> $GITHUB_OUTPUT ;;
-          *)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
+            main) echo "env_name=prod" >> $GITHUB_OUTPUT ;;
+            uat)  echo "env_name=uat" >> $GITHUB_OUTPUT ;;
+            qa)   echo "env_name=qa" >> $GITHUB_OUTPUT ;;
+            *)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
           esac 
-  test-gcp-connection:      #Nombre del segundo job     
-    needs: prepare      #depende que se ejecute el job anterior llamado prepare
+
+  test-gcp-connection:      # Nombre del segundo job     
+    needs: prepare          # depende que se ejecute el job anterior llamado prepare
     runs-on: ubuntu-latest
-    environment: ${{ needs.prepare.outputs.env_name}} # Usa las variables del environment que viene de la rama que se identifica en el job anterior 
-    concurrency: ${{ needs.prepare.outputs.env_name}} # Solo se ejecuta un job por rama
+    environment: ${{ needs.prepare.outputs.env_name }} # Usa las variables del environment que viene de la rama que se identifica en el job anterior 
+    concurrency: ${{ needs.prepare.outputs.env_name }} # Solo se ejecuta un job por rama
     steps:
       - name: Checkout Code # Descarga el codigo de la rama que se va a ejecutar
         uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
 
       # 3. Verificación limpia sin necesidad de "gcloud auth login" manual
       - name: Verify Connection
-        run: |         #Imprime las redes que tiene acceso y la cuenta que tiene acceso
+        run: |         # Imprime las redes que tiene acceso y la cuenta que tiene acceso
           gcloud auth list
           gcloud compute networks list 
 
