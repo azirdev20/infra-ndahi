@@ -26,7 +26,7 @@ jobs:
           main)    echo "env_name=prod" >> $GITHUB_OUTPUT ;;
           uat)    echo "env_name=uat" >> $GITHUB_OUTPUT ;;
           qa)    echo "env_name=qa" >> $GITHUB_OUTPUT ;;
-          dev)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
+          *)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
           esac 
   test-gcp-connection:      #Nombre del segundo job     
     needs: prepare      #depende que se ejecute el job anterior llamado prepare
