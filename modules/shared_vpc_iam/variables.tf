@@ -9,9 +9,9 @@ variable "default_region" {
 }
 
 variable "gke_service_projects" {
-  description = "Lista de IDs de proyectos de servicio que ejecutaran clusters de GKE."
-  type        = list(string)
-  default     = []
+  description = "Mapa de IDs de proyectos de servicio a sus respectivos numeros de proyecto (ej. {'ndahi-app-v1' = '483094267123'})."
+  type        = map(string)
+  default     = {}
 }
 
 variable "subnets_network_users" {

@@ -76,9 +76,9 @@ variable "service_projects" {
 }
 
 variable "gke_service_projects" {
-  description = "Lista de IDs de proyectos de servicio que van a desplegar clusters de GKE."
-  type        = list(string)
-  default     = []
+  description = "Mapa de IDs de proyectos de servicio de GKE a sus numeros de proyecto."
+  type        = map(string)
+  default     = {}
 }
 variable "subnets_network_users" {
   description = "Mapa de subredes a la lista de miembros con permiso de usar la red (roles/compute.networkUser)."

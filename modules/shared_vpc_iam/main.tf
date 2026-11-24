@@ -1,16 +1,10 @@
-# 1. Consulta dinamica del numero de proyecto para cada Service Project de GKE
-data "google_project" "gke_projects" {
-  for_each   = toset(var.gke_service_projects)
-  project_id = each.value
-}
-
-# 2. Asigna roles/container.hostServiceAgentUser en el Host Project para cada robot de GKE
+# 1. Asigna roles/container.hostServiceAgentUser en el Host Project para cada robot de GKE
 resource "google_project_iam_member" "gke_host_service_agent" {
-  for_each = data.google_project.gke_projects
+  for_each = var.gke_service_projects
 
   project = var.project_id
   role    = "roles/container.hostServiceAgentUser"
-  member  = "serviceAccount:service-${each.value.number}@container-engine-robot.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${each.value}@container-engine-robot.iam.gserviceaccount.com"
 }
 
 # 3. Aplana las cuentas autorizadas por cada subred

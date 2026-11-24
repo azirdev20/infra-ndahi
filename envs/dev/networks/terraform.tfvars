@@ -37,9 +37,9 @@ secondary_ranges = {
 shared_vpc_host  = true
 service_projects = ["ndahi-app-v1"]
 
-gke_service_projects = [
-  "ndahi-app-v1"
-]
+gke_service_projects = {
+  "ndahi-app-v1" = "483094267123"
+}
 
 subnets_network_users = {
   "ndahi-gke-nodos" = [
