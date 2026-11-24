@@ -1,0 +1,110 @@
+name: Terraform CI/CD
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'envs/**'
+      - 'modules/**'
+
+  push:
+    branches: [ main ]
+    paths:
+      - 'envs/**'
+      - 'modules/**'
+
+  workflow_dispatch:
+    inputs:
+      layer:
+        description: 'Capa de infraestructura a ejecutar'
+        required: true
+        default: 'networks'
+        type: choice
+        options:
+          - networks
+          - iam
+      action:
+        description: 'Accion de Terraform a ejecutar'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write # Permite comentar el resultado del plan en el PR si se requiere
+
+jobs:
+  # 1. Determina el entorno correspondiente
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ steps.set-env.outputs.env_name }}
+    steps:
+      - id: set-env
+        run: |
+          TARGET_BRANCH="${{ github.base_ref || github.ref_name }}"
+          case "$TARGET_BRANCH" in
+            main) echo "env_name=dev" >> $GITHUB_OUTPUT ;;
+            qa)   echo "env_name=qa" >> $GITHUB_OUTPUT ;;
+            *)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
+          esac
+
+  # 2. Ejecucion de Terraform por Capa (Matrix)
+  terraform:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: ${{ needs.prepare.outputs.env_name }}
+    concurrency: ${{ needs.prepare.outputs.env_name }}-${{ github.event.inputs.layer || 'all' }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        layer: ${{ github.event.inputs.layer && fromJSON(format('["{0}"]', github.event.inputs.layer)) || ['networks', 'iam'] }}
+
+    defaults:
+      run:
+        working-directory: envs/${{ needs.prepare.outputs.env_name }}/${{ matrix.layer }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Autenticacion segura mediante WIF
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.PROJECT_ID }}
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_WIF }}
+
+      # Instalar Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      # Verificacion de Formato
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      # Inicializacion del Backend en GCS
+      - name: Terraform Init
+        run: terraform init
+
+      # Validacion de Sintaxis
+      - name: Terraform Validate
+        run: terraform validate
+
+      # PLAN: Se ejecuta en Pull Requests o cuando se pide manualmente
+      - name: Terraform Plan
+        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
+        run: terraform plan -no-color
+
+      # APPLY: Se ejecuta al hacer merge a main o manualmente con accion 'apply'
+      - name: Terraform Apply
+        if: (github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        run: terraform apply -auto-approve
