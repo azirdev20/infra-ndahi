@@ -49,7 +49,7 @@ jobs:
         run: |
           TARGET_BRANCH="${{ github.base_ref || github.ref_name }}"
           case "$TARGET_BRANCH" in
-            main) echo "env_name=prod" >> $GITHUB_OUTPUT ;;
+            main) echo "env_name=dev" >> $GITHUB_OUTPUT ;;
             qa)   echo "env_name=qa" >> $GITHUB_OUTPUT ;;
             *)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
           esac
