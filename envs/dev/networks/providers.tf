@@ -10,6 +10,7 @@ terraform {
 
   backend "gcs" {
     bucket = "ndahi-dev-nas1-bkt-networking-01"
+    prefix = "networks"
   }
 }
 
