@@ -31,4 +31,7 @@ resource "google_project_iam_member" "project_roles" {
   project = var.project_id
   role    = each.value.role
   member  = "serviceAccount:${google_service_account.accounts[each.value.sa_key].email}"
+  depends_on = [
+    google_service_account.accounts
+  ]
 }
