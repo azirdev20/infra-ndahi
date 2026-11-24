@@ -111,9 +111,9 @@ jobs:
       # PLAN: Se ejecuta en Pull Requests o cuando se pide manualmente
       - name: Terraform Plan
         if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
-        run: terraform plan -no-color
+        run: terraform plan -input=false -no-color
 
       # APPLY: Se ejecuta al hacer merge a main o manualmente con accion 'apply'
       - name: Terraform Apply
         if: (github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
-        run: terraform apply -auto-approve
+        run: terraform apply -input=false -auto-approve
