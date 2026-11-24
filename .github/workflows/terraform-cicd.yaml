@@ -38,11 +38,12 @@ permissions:
   pull-requests: write # Permite comentar el resultado del plan en el PR si se requiere
 
 jobs:
-  # 1. Determina el entorno correspondiente
+  # 1. Determina el entorno correspondiente y las capas a ejecutar
   prepare:
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.set-env.outputs.env_name }}
+      layers: ${{ steps.set-layers.outputs.layers }}
     steps:
       - id: set-env
         run: |
@@ -52,6 +53,14 @@ jobs:
             qa)   echo "env_name=qa" >> $GITHUB_OUTPUT ;;
             *)    echo "env_name=dev" >> $GITHUB_OUTPUT ;;
           esac
+
+      - id: set-layers
+        run: |
+          if [ -n "${{ github.event.inputs.layer }}" ]; then
+            echo "layers=[\"${{ github.event.inputs.layer }}\"]" >> $GITHUB_OUTPUT
+          else
+            echo "layers=[\"networks\", \"iam\"]" >> $GITHUB_OUTPUT
+          fi
 
   # 2. Ejecucion de Terraform por Capa (Matrix)
   terraform:
@@ -63,7 +72,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        layer: ${{ github.event.inputs.layer && fromJSON(format('["{0}"]', github.event.inputs.layer)) || ['networks', 'iam'] }}
+        layer: ${{ fromJSON(needs.prepare.outputs.layers) }}
 
     defaults:
       run:
